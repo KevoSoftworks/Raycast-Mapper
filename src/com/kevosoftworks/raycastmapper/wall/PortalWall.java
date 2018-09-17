@@ -8,8 +8,6 @@ public class PortalWall extends Wall{
 	
 	int rid;
 	
-	float portalHeight;
-	
 	float pStart;
 	float pStop;
 	
@@ -18,6 +16,7 @@ public class PortalWall extends Wall{
 		this.rid = rid;
 		this.pStart = pStart;
 		this.pStop = pStop;
+		this.wallType = Wall.WALLTYPE_PORTAL;
 	}
 	
 	public int getRoomId(){

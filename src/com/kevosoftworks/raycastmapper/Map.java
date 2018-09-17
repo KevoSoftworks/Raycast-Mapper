@@ -11,6 +11,10 @@ import java.util.concurrent.Callable;
 
 import com.kevosoftworks.raycastmapper.art.Art;
 import com.kevosoftworks.raycastmapper.matrix.Matrix2;
+import com.kevosoftworks.raycastmapper.savable.SavableConvexRoom;
+import com.kevosoftworks.raycastmapper.savable.SavableMap;
+import com.kevosoftworks.raycastmapper.savable.SavableWall;
+import com.kevosoftworks.raycastmapper.savable.SaveFile;
 import com.kevosoftworks.raycastmapper.ui.Button;
 import com.kevosoftworks.raycastmapper.vector.Vector2;
 import com.kevosoftworks.raycastmapper.wall.PortalWall;
@@ -24,6 +28,7 @@ public class Map {
 	ArrayList<ConvexRoom> rooms;
 	ArrayList<Button> buttons;
 	int curuuid = 1;
+	SaveFile sf;
 	
 	boolean isTopDown = true;
 	boolean renderMap = true;
@@ -34,6 +39,8 @@ public class Map {
 	float curLocX;
 	float curLocY;
 	
+	static boolean save = false;
+	static boolean load = false;
 	static int curRoom = 0;
 	static int curWall = 0;
 	static boolean newRoom = false;
@@ -52,6 +59,8 @@ public class Map {
 	static float dPortalEnd = 0f;
 	static int dPortalRoomId = 0;
 	static int dWallTex = 0;
+	static boolean flipNormal = false;
+	static float dRoomHeight = 0f;
 	
 	boolean editTmpWall = false;
 	Location tmpWallStart = null;
@@ -62,6 +71,7 @@ public class Map {
 		camera = new Camera(this, new Location(0f,0f));
 		rooms = new ArrayList<ConvexRoom>();
 		buttons = new ArrayList<Button>();
+		sf = new SaveFile("maps/");
 		
 		ArrayList<Wall>w1 = new ArrayList<Wall>();		
 		ConvexRoom r1 = new ConvexRoom(0, w1);
@@ -71,7 +81,24 @@ public class Map {
 		
 		rooms.add(r1);
 		
-		Button b = new Button(0, 0, 6, 10, art.text("<"), new Callable<Boolean>(){
+		Button b = new Button(Main.RW - 24, Main.RH - 11, 22, 10, art.text("Save"), new Callable<Boolean>(){
+			@Override
+			public Boolean call() throws Exception{
+				Map.save = true;
+				return null;
+			}
+		});
+		buttons.add(b);
+		b = new Button(Main.RW - 24, Main.RH - 22, 22, 10, art.text("Load"), new Callable<Boolean>(){
+			@Override
+			public Boolean call() throws Exception{
+				Map.load = true;
+				return null;
+			}
+		});
+		buttons.add(b);
+		
+		b = new Button(0, 0, 6, 10, art.text("<"), new Callable<Boolean>(){
 			@Override
 			public Boolean call() throws Exception{
 				Map.curRoom -= 1;
@@ -146,7 +173,7 @@ public class Map {
 		});
 		buttons.add(b);
 		
-		b = new Button(2, 85, 37, 10, art.text("Tgl Floor"), new Callable<Boolean>(){
+		b = new Button(2, 90, 37, 10, art.text("Tgl Floor"), new Callable<Boolean>(){
 			@Override
 			public Boolean call() throws Exception{
 				Map.toggleFloor = true;
@@ -154,7 +181,7 @@ public class Map {
 			}
 		});
 		buttons.add(b);
-		b = new Button(45, 85, 32, 10, art.text("Tgl Ceil"), new Callable<Boolean>(){
+		b = new Button(45, 90, 32, 10, art.text("Tgl Ceil"), new Callable<Boolean>(){
 			@Override
 			public Boolean call() throws Exception{
 				Map.toggleCeil = true;
@@ -321,6 +348,32 @@ public class Map {
 			}
 		});
 		buttons.add(b);
+		
+		b = new Button(75, 142, 18, 10, art.text("FlpN"), new Callable<Boolean>(){
+			@Override
+			public Boolean call() throws Exception{
+				Map.flipNormal = true;
+				return null;
+			}
+		});
+		buttons.add(b);
+		
+		b = new Button(50, 78, 6, 10, art.text("-"), new Callable<Boolean>(){
+			@Override
+			public Boolean call() throws Exception{
+				Map.dRoomHeight -= 0.1f;
+				return null;
+			}
+		});
+		buttons.add(b);
+		b = new Button(56, 78, 6, 10, art.text("+"), new Callable<Boolean>(){
+			@Override
+			public Boolean call() throws Exception{
+				Map.dRoomHeight += 0.1f;
+				return null;
+			}
+		});
+		buttons.add(b);
 	}
 	
 	public void tick(InputHandler input){
@@ -343,6 +396,49 @@ public class Map {
 		
 		for(Button b:buttons){
 			b.tick(input);
+		}
+		
+		if(save){
+			System.out.println("Saving map!");
+			sf.saveMap(new SavableMap(this));
+			save = false;
+			System.out.println("Done!");
+		}
+		
+		if(load){
+			System.out.println("Loading map!");
+			SavableMap m = sf.loadMap();
+			for(SavableConvexRoom scr:m.getRooms()){
+				ArrayList<Wall> w = new ArrayList<Wall>();
+				for(SavableWall sw:scr.getWalls()){
+					if(sw.getWallType() == Wall.WALLTYPE_PORTAL){
+						w.add(new PortalWall(
+									sw.getId(),
+									sw.getLocation1(),
+									sw.getLocation2(),
+									sw.getNormal(),
+									art.getTexture(sw.getTextureNumber()),
+									sw.getPortalStart(),
+									sw.getPortalStop(),
+									sw.getHeight(),
+									sw.getPortalRoomId()
+								));
+					} else {
+						w.add(new SolidWall(
+									sw.getId(),
+									sw.getLocation1(),
+									sw.getLocation2(),
+									sw.getNormal(),
+									art.getTexture(sw.getTextureNumber()),
+									sw.getHeight()
+								));
+					}
+				}
+				ConvexRoom r = new ConvexRoom(scr.getId(), w);
+				rooms.add(r);
+			}
+			load = false;
+			System.out.println("Done!");
 		}
 		
 		if(curRoom < 0) curRoom = 0;
@@ -392,6 +488,11 @@ public class Map {
 			dCeilHeight = 0f;
 		}
 		
+		if(dRoomHeight != 0f){
+			r.setZHeight(roundToOne(r.getZHeight() + dRoomHeight));
+			dRoomHeight = 0f;
+		}
+		
 		if(this.getRoom(curRoom).getWall(curWall) instanceof PortalWall){
 			PortalWall pw = (PortalWall)this.getRoom(curRoom).getWall(curWall);
 			if(dPortalStart != 0f){
@@ -418,9 +519,14 @@ public class Map {
 			if(dWallTex != 0){
 				w.setTexture(art.getTexture(w.getTexture().getNumber() + dWallTex));
 			}
+			if(flipNormal){
+				flipNormal = false;
+				w.getNormal().multiply(-1f);
+			}
 		}
 		dWallHeight = 0f;
 		dWallTex = 0;
+		flipNormal = false;
 		
 		if(toggleWallType && w != null){
 			toggleWallType = false;
@@ -444,13 +550,15 @@ public class Map {
 				tmpWallStart = new Location(roundToGrid(curLocX), roundToGrid(curLocY));
 			} else {
 				editTmpWall = false;
+				float normDy = tmpWallEnd.getY() - tmpWallStart.getY();
+				float normDx = tmpWallEnd.getX() - tmpWallStart.getX();
 				curWall = this.getRoom(curRoom).addWall(new SolidWall(
 							this.getRoom(curRoom).getNewWallId(), //Wall ID
 							new Location(tmpWallStart.getX(), tmpWallStart.getY()), //X pos 
 							new Location(tmpWallEnd.getX(), tmpWallEnd.getY()), //Y pos
-							new Vector2(1f, 0f), //Normal
+							new Vector2(-normDy, normDx).normalised(), //Normal
 							art.getTexture(Art.TEXTURE_NONE), //Texture
-							1f //Height
+							0f //Z-Height
 						));
 			}
 		}
@@ -505,7 +613,15 @@ public class Map {
 						}
 						gA[1].setColor(Color.WHITE);
 						if(w instanceof PortalWall) gA[1].setColor(Color.YELLOW);
-						if(w.getId() == curWall) gA[1].setColor(Color.RED);
+						if(w.getId() == curWall){
+							gA[1].setColor(Color.WHITE);
+							int sX = (int)(p[0].getX() + p[1].getX()) / 2;
+							int sY = (int)(p[0].getY() + p[1].getY()) / 2;
+							int nX = (int) (sX + w.getNormal().getX() * 10);
+							int nY = (int) (sY + w.getNormal().getY() * 10);
+							gA[1].drawLine(sX, sY, nX, nY);
+							gA[1].setColor(Color.RED);
+						}
 						
 					} else {
 						gA[1].setColor(new Color(0f, 0f, 1f, 0.5f));
@@ -530,13 +646,15 @@ public class Map {
 		
 		ConvexRoom r = this.getRoom(curRoom);
 		gA[1].setColor(Color.BLACK);
-		gA[1].fillRect(0, 30, 96, 52);
+		gA[1].fillRect(0, 30, 96, 71);
 		gA[1].drawImage(art.text("--Room Properties--"), 5, 32, null);
 		gA[1].drawImage(art.text("F: " + r.hasFloor() + ", " + r.getFloorTextureScale()), 1, 44, null);
 		if(r.hasFloor())gA[1].drawImage(r.getFloorTexture().getBufferedImage(), 80, 42, 96, 58, 0, 0, 16, 16, null);
 		
 		gA[1].drawImage(art.text("C: " + r.hasCeiling() + ", " + r.getCeilingTextureScale()), 1, 66, null);
 		if(r.hasCeiling())gA[1].drawImage(r.getCeilingTexture().getBufferedImage(), 80, 64, 96, 80, 0, 0, 16, 16, null);
+		
+		gA[1].drawImage(art.text("Height: " + r.getZHeight()), 1, 79, null);
 		
 		for(Button b:buttons){
 			b.render(gA);
@@ -631,6 +749,10 @@ public class Map {
     
     public float roundToOne(float num){
     	return Math.round(num * 10f) / 10f;
+    }
+    
+    public ConvexRoom[] getRooms(){
+    	return this.rooms.toArray(new ConvexRoom[1]);
     }
 
 }

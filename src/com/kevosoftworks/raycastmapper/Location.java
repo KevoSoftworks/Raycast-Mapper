@@ -1,8 +1,14 @@
 package com.kevosoftworks.raycastmapper;
 
+import com.kevosoftworks.raycastmapper.savable.Savable;
 import com.kevosoftworks.raycastmapper.vector.Vector2;
 
-public class Location {
+public class Location extends Savable{
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	
 	float x;
 	float y;

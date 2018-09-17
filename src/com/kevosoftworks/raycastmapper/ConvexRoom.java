@@ -85,6 +85,10 @@ public class ConvexRoom{
 		if(textureScale < 0.1f) this.ceilTextureScale = 0.1f;
 	}
 	
+	public void setZHeight(float zh){
+		this.zHeight = zh;
+	}
+	
 	public boolean hasFloor(){
 		return this.hasFloor;
 	}
@@ -139,5 +143,9 @@ public class ConvexRoom{
 			if(w.getId() == id) return walls.remove(w);
 		}
 		return false;
+	}
+	
+	public float getZHeight(){
+		return this.zHeight;
 	}
 }

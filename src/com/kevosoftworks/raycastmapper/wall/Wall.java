@@ -7,12 +7,17 @@ import com.kevosoftworks.raycastmapper.vector.Vector2;
 
 public class Wall{
 	
+	public static final int WALLTYPE_NONE = 0;
+	public static final int WALLTYPE_SOLID = 1;
+	public static final int WALLTYPE_PORTAL = 2;
+	
 	int id;
 	Location p1;
 	Location p2;
 	Texture tex;
 	float height;
 	Vector2 normal;
+	int wallType = WALLTYPE_NONE;
 	
 	public Wall(int id, Location p1, Location p2, Vector2 norm, Texture tex){
 		this.id = id;
@@ -73,6 +78,10 @@ public class Wall{
 	
 	public int getId(){
 		return this.id;
+	}
+	
+	public int getWallType(){
+		return this.wallType;
 	}
 
 }
