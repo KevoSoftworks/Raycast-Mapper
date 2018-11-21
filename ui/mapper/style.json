@@ -1,0 +1,32 @@
+{
+	"element": {
+		"button": {
+			"border": "1px #0000ff",
+			"background-color": "#000000",
+			"color": "#ffffff",
+			"onHover": {
+				"background-color": "#000088"
+			},
+			"onClick": {
+				"background-color": "#0000ff"
+			}
+		},
+		
+		"p": {
+			"color": "#ffffff"
+		}
+	},
+	
+	"id": {
+		"testDiv": {
+			"width": "50rw",
+			"position": "absolute",
+			"location": "center center",
+			"background-color": "#971d20"
+		}
+	},
+	
+	"class": {
+	
+	}
+}

@@ -38,12 +38,22 @@ public class SavableConvexRoom extends Savable{
 		}
 		
 		this.hasFloor = c.hasFloor();
-		this.floorTextureNum = c.getFloorTexture().getNumber();
-		this.floorTextureScale = c.getFloorTextureScale();
+		if(this.hasFloor){
+			this.floorTextureNum = c.getFloorTexture().getNumber();
+			this.floorTextureScale = c.getFloorTextureScale();
+		} else {
+			this.floorTextureNum = Art.TEXTURE_NONE;
+			this.floorTextureScale = 1f;
+		}
 		
 		this.hasCeil = c.hasCeiling();
-		this.ceilTextureNum = c.getFloorTexture().getNumber();
-		this.ceilTextureScale = c.getCeilingTextureScale();
+		if(this.hasCeil){
+			this.ceilTextureNum = c.getFloorTexture().getNumber();
+			this.ceilTextureScale = c.getCeilingTextureScale();
+		} else {
+			this.ceilTextureNum = Art.TEXTURE_NONE;
+			this.ceilTextureScale = 1f;
+		}
 	}
 	
 	public int getId(){

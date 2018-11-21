@@ -1,0 +1,18 @@
+{
+	"div": {
+		"id": "testDiv",
+		"class": [],
+		"content": {
+			"p": {
+				"class": [],
+				"content": "Hello world!"
+			},
+			
+			"button": {
+				"id": "button1",
+				"class": [],
+				"content": "Click me!"
+			}
+		}
+	}
+}

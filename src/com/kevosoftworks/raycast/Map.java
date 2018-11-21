@@ -27,7 +27,7 @@ public class Map {
 	Art art;
 	ArrayList<ConvexRoom> rooms;
 	ArrayList<Button> buttons;
-	int curuuid = 1;
+	int curuuid = 0;
 	SaveFile sf;
 	
 	boolean isTopDown = true;
@@ -407,6 +407,7 @@ public class Map {
 		
 		if(load){
 			System.out.println("Loading map!");
+			rooms = new ArrayList<ConvexRoom>();
 			SavableMap m = sf.loadMap();
 			for(SavableConvexRoom scr:m.getRooms()){
 				ArrayList<Wall> w = new ArrayList<Wall>();
@@ -435,6 +436,9 @@ public class Map {
 					}
 				}
 				ConvexRoom r = new ConvexRoom(scr.getId(), w);
+				r.setCeilingProperties(scr.hasCeiling(), art.getTexture(scr.getCeilingTextureNumber()), scr.getCeilingTextureScale());
+				r.setFloorProperties(scr.hasFloor(), art.getTexture(scr.getFloorTextureNumber()), scr.getFloorTextureScale());
+				r.setZHeight(scr.getZHeight());
 				rooms.add(r);
 			}
 			load = false;
@@ -558,7 +562,7 @@ public class Map {
 							new Location(tmpWallEnd.getX(), tmpWallEnd.getY()), //Y pos
 							new Vector2(-normDy, normDx).normalised(), //Normal
 							art.getTexture(Art.TEXTURE_NONE), //Texture
-							0f //Z-Height
+							1f //Height
 						));
 			}
 		}

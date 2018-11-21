@@ -79,6 +79,13 @@ public class Main extends Canvas implements Runnable{
 		
 		jframe.setVisible(true);
 		
+		try{
+			Thread.sleep(50);
+		} catch (InterruptedException e){
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		
 		world = new BufferedImage(RW, RH, BufferedImage.TYPE_INT_RGB);
 		
 		jframe.createBufferStrategy(2);
