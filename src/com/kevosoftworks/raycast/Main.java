@@ -27,8 +27,8 @@ public class Main extends Canvas implements Runnable{
 	public static final boolean FULLRESOLUTION = false;
 	public static int WH = 1080;
 	public static int WW = 1920;
-	public static final int RH = FULLRESOLUTION ? WH : 200;
-	public static final int RW = FULLRESOLUTION ? WW : 320;
+	public static final int RH = FULLRESOLUTION ? WH : 420;
+	public static final int RW = FULLRESOLUTION ? WW : 640;
 	public static Dimension screenRes;
 	private JFrame jframe;
 	
